@@ -1,15 +1,17 @@
 version: "3.9"
 services:
   app:
-    build: ./infra/php
-    volumes:
+    build: ./infra/php #この配下にあるDockerfileをビルドする
+    volumes: #作業ディレクトリの共有設定。左がホスト、右がコンテナ内
       - ./backend:/work
 
   web:
-    image: nginx:1.20-alpine
-    ports:
+    image: nginx:1.20-alpine #DockerHubから直接imageを持ってくるだけならimageをシンプルに記述。alpineは軽量版でashを使う。
+    ports: #ポートフォワード設定。左がホスト、右がコンテナ
       - 8080:80
     volumes:
-      - ./backend:/work
-      - ./infra/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./backend:/work #どうしてnginxでappコンテナと同じボリュームを指定しているんだ？
+      - ./infra/nginx/default.conf:/etc/nginx/conf.d/default.conf #これはわかる
     working_dir: /work
+
+  
