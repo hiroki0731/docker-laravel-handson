@@ -14,4 +14,10 @@ services:
       - ./infra/nginx/default.conf:/etc/nginx/conf.d/default.conf #これはわかる
     working_dir: /work
 
-  
+  db:
+    build: ./infra/mysql #今回はビルドしてるけどenvironmentで色々指定しちゃっても良い（神くん方式）
+    volumes:
+      - db-store:/var/lib/mysql #./などのパス指定なしで書いたら名前つきボリュームと認定される。
+
+volumes: #名前つきボリュームを指定
+  db-store:
