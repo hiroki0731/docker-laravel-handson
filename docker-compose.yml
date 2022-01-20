@@ -22,9 +22,7 @@ services: #サービスにはコンテナがアタッチされる。サービス
     working_dir: /work
 
   db: #dbのコンテナ
-    build:
-      context: .
-      dockerfile: ./infra/mysql/Dockerfile
+    build: ./infra/mysql
     restart: always
     volumes:
       - db-store:/var/lib/mysql #./などのパス指定なしで書いたら名前つきボリュームと認定される。永続データを持つコンテナ(主にDB)で使用。
