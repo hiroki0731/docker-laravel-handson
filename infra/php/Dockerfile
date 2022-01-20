@@ -21,8 +21,8 @@ RUN apt-get update && \
   docker-php-ext-install intl pdo_mysql zip bcmath
 
 # 左のホスト側ファイルを右のコンテナの場所へコピーしてる。
-COPY ./php.ini /usr/local/etc/php/php.ini
+COPY /infra/php/php.ini /usr/local/etc/php/php.ini
+COPY /backend /work
 
 # コンテナの作業ディレクトリを指定
 WORKDIR /work
-EXPOSE 9000

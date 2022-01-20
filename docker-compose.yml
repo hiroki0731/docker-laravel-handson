@@ -1,24 +1,30 @@
 version: "3.9" #docker-composeのバージョン指定。今は3系。1や2だと書式変わったりするみたい。マイナーバージョンは確認せよ。
-services: #サービスにはコンテナがアタッチされる。サービスの実態はコンテナ。今回はコンテナ3つ建てるって感じ。
-
-  app: #名前は任意
-    build: ./infra/php #この配下にあるDockerfileをビルドする
-    restart: always # おまじない（いつもコンテナの再起動を実施）
+services: #サービスにはコンテナがアタッチされる。サービスの実態はコンテナ。今回はコンテナ3つ建てる。
+  app: #名前は任意。今回はappという名前でLaravelを入れるコンテナにする
+    build: #dockerfileの場所を指定してビルドする
+      context: .
+      dockerfile: ./infra/php/Dockerfile
+    restart: always #おまじない（毎回コンテナを再起動する設定らしい）
     volumes: #作業ディレクトリの共有設定。左がホスト、右がコンテナ内
       - ./backend:/work
-
-  web:
-    image: nginx:1.20-alpine #DockerHubから直接imageを持ってくるだけならimageをシンプルに記述。alpineは軽量版でashを使う。
-    restart: always
-    ports: #ポートフォワード設定。左がホスト、右がコンテナ
-      - 8080:80
-    volumes:
-      - ./backend:/work #nginxからもappコンテナのファイル操作する必要があるため同じボリュームを指定
-      - ./infra/nginx/default.conf:/etc/nginx/conf.d/default.conf
     working_dir: /work
 
-  db:
-    build: ./infra/mysql #今回はビルドしてるけどenvironmentで色々指定しちゃっても良い（神くん方式）
+  web: #nginxのコンテナ
+    build:
+      context: .
+      dockerfile: ./infra/nginx/Dockerfile
+    restart: always
+    ports: #ポートフォワードの設定。左がホスト、右がコンテナ。ホストから8080番でアクセスすればコンテナのデフォルト設定の80番にアクセスする。
+      - 8080:80
+    volumes:
+      - ./backend:/work
+      - ./infra/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+    working_dir: /work
+
+  db: #dbのコンテナ
+    build:
+      context: .
+      dockerfile: ./infra/mysql/Dockerfile
     restart: always
     volumes:
       - db-store:/var/lib/mysql #./などのパス指定なしで書いたら名前つきボリュームと認定される。永続データを持つコンテナ(主にDB)で使用。
@@ -26,4 +32,4 @@ services: #サービスにはコンテナがアタッチされる。サービス
       - 33060:3306 #ポート被りをケア。左がホストだからDBツールで見るときは33060を指定する。
 
 volumes: #名前つきボリュームを指定。コンテナ削除しても消えない永続データを持ちたい時に指定する
-  db-store: #名前は任意
+  db-store: #名前は任意。この名前はdbコンテナのvolume設定のところで使用する。
